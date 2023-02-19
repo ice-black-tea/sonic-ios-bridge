@@ -48,6 +48,10 @@ var rootCmd = &cobra.Command{
  `,
 }
 
+func init() {
+	rootCmd.Flags().StringVarP(&udid, "udid", "u", "", "device's serialNumber ( default first device )")
+}
+
 // Execute error
 func Execute() {
 	rootCmd.PersistentFlags().String("log-level", "info", "Valid values: [panic, fatal, error, warn, info, debug, trace]")
