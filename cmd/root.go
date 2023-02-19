@@ -43,6 +43,10 @@ https://github.com/SonicCloudOrg/sonic-ios-bridge
 `,
 }
 
+func init() {
+	rootCmd.Flags().StringVarP(&udid, "udid", "u", "", "device's serialNumber ( default first device )")
+}
+
 // Execute error
 func Execute() {
 	err := rootCmd.Execute()
