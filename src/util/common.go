@@ -299,6 +299,7 @@ func GetApplicationPID(device giDevice.Device, appName string) (pid int, err err
 
 func StartProxy() func(listener net.Listener, port int, device giDevice.Device) {
 	return func(listener net.Listener, port int, device giDevice.Device) {
+		fmt.Println("Listen on:", listener.Addr())
 		for {
 			var accept net.Conn
 			var err error
@@ -327,11 +328,13 @@ func StartProxy() func(listener net.Listener, port int, device giDevice.Device) 
 				go func(lConn, rConn net.Conn) {
 					if _, err := io.Copy(lConn, rConn); err != nil {
 						log.Println("local -> remote failed:", err)
+						lConn.Close()
 					}
 				}(lConn, rConn)
 				go func(lConn, rConn net.Conn) {
 					if _, err := io.Copy(rConn, lConn); err != nil {
 						log.Println("local <- remote failed:", err)
+						lConn.Close()
 					}
 				}(lConn, rConn)
 			}(accept)
