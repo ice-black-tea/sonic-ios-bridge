@@ -20,6 +20,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/SonicCloudOrg/sonic-ios-bridge/src/util"
 	"github.com/spf13/cobra"
 )
 
@@ -34,17 +35,17 @@ var rootCmd = &cobra.Command{
 	Use:   strExeccutable,
 	Short: "Bridge of iOS Devices",
 	Long: `
-   ▄▄▄▄      ▄▄▄▄    ▄▄▄   ▄▄   ▄▄▄▄▄▄      ▄▄▄▄
- ▄█▀▀▀▀█    ██▀▀██   ███   ██   ▀▀██▀▀    ██▀▀▀▀█
- ██▄       ██    ██  ██▀█  ██     ██     ██▀
-  ▀████▄   ██    ██  ██ ██ ██     ██     ██
-      ▀██  ██    ██  ██  █▄██     ██     ██▄
- █▄▄▄▄▄█▀   ██▄▄██   ██   ███   ▄▄██▄▄    ██▄▄▄▄█
-  ▀▀▀▀▀      ▀▀▀▀    ▀▀   ▀▀▀   ▀▀▀▀▀▀      ▀▀▀▀
-
-    Copyright (C) 2022 SonicCloudOrg AGPLv3
-https://github.com/SonicCloudOrg/sonic-ios-bridge
-`,
+	▄▄▄▄      ▄▄▄▄    ▄▄▄   ▄▄   ▄▄▄▄▄▄      ▄▄▄▄
+  ▄█▀▀▀▀█    ██▀▀██   ███   ██   ▀▀██▀▀    ██▀▀▀▀█
+  ██▄       ██    ██  ██▀█  ██     ██     ██▀
+   ▀████▄   ██    ██  ██ ██ ██     ██     ██
+	   ▀██  ██    ██  ██  █▄██     ██     ██▄
+  █▄▄▄▄▄█▀   ██▄▄██   ██   ███   ▄▄██▄▄    ██▄▄▄▄█
+   ▀▀▀▀▀      ▀▀▀▀    ▀▀   ▀▀▀   ▀▀▀▀▀▀      ▀▀▀▀
+ 
+	 Copyright (C) 2022 SonicCloudOrg AGPLv3
+ https://github.com/SonicCloudOrg/sonic-ios-bridge
+ `,
 }
 
 func init() {
@@ -53,6 +54,9 @@ func init() {
 
 // Execute error
 func Execute() {
+	rootCmd.PersistentFlags().String("log-level", "info", "Valid values: [panic, fatal, error, warn, info, debug, trace]")
+	rootCmd.ParseFlags(os.Args) // parse flags and set log level
+	util.InitLogger(rootCmd.PersistentFlags().Lookup("log-level").Value.String())
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

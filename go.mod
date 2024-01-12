@@ -4,12 +4,13 @@ go 1.18
 
 require (
 	github.com/Masterminds/semver v1.5.0
-	github.com/SonicCloudOrg/sonic-gidevice v0.7.6
+	github.com/SonicCloudOrg/sonic-gidevice v0.7.7
 	github.com/SonicCloudOrg/sonic-ios-webkit-adapter v0.0.7
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/gopacket v1.1.19
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/hashicorp/go-envparse v0.1.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.3
