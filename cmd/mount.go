@@ -19,11 +19,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/SonicCloudOrg/sonic-ios-bridge/src/util"
 	"os"
+
+	"github.com/SonicCloudOrg/sonic-ios-bridge/src/util"
 
 	"github.com/spf13/cobra"
 )
+
+var timeout int = 30
 
 var mountCmd = &cobra.Command{
 	Use:   "mount",
@@ -34,7 +37,7 @@ var mountCmd = &cobra.Command{
 		if device == nil {
 			os.Exit(0)
 		}
-		util.CheckMount(device)
+		util.CheckMount(device, timeout)
 		fmt.Println("mount successful!")
 		return nil
 	},
@@ -42,5 +45,6 @@ var mountCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(mountCmd)
+	mountCmd.Flags().IntVarP(&timeout, "timeout", "t", 30, "download timeout seconds")
 	mountCmd.Flags().StringVarP(&udid, "udid", "u", "", "device's serialNumber ( default first device )")
 }

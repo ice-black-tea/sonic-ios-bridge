@@ -35,14 +35,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mitchellh/go-homedir"
+
 	giDevice "github.com/SonicCloudOrg/sonic-gidevice"
 	"github.com/SonicCloudOrg/sonic-ios-bridge/src/entity"
-)
-
-const (
-	DownLoadTimeOut    = 30 * time.Second
-	baseDir            = ".sib"
-	RemoteInfoFilePath = baseDir + string(filepath.Separator) + "connect.txt"
 )
 
 var versionMap = map[string]string{
@@ -50,6 +46,18 @@ var versionMap = map[string]string{
 }
 
 var urlList = [...]string{"https://github.com/JinjunHan"}
+
+func GetBaseDir() string {
+	baseDir, err := homedir.Expand("~" + string(filepath.Separator) + ".sib")
+	if err != nil {
+		baseDir = ".sib"
+	}
+	return baseDir
+}
+
+func GetRemoteInfoFilePath() string {
+	return GetBaseDir() + string(filepath.Separator) + "connect.txt"
+}
 
 func GetDeviceByUdId(udId string) (device giDevice.Device) {
 	remoteList, err2 := ReadRemote()
@@ -100,8 +108,7 @@ func ReadRemote() (remoteDevList map[string]giDevice.Device, err error) {
 			fmt.Println("recover...:", r)
 		}
 	}()
-
-	file, err := os.Open(RemoteInfoFilePath)
+	file, err := os.Open(GetRemoteInfoFilePath())
 	if err != nil {
 		return nil, err
 	}
@@ -155,22 +162,22 @@ func CheckRemoteConnect(ip string, port int, timeout int) (dev giDevice.Device, 
 	return dev, version, nil
 }
 
-func downloadZip(url, version string) (string, error) {
+func downloadZip(url, version string, timeout int) (string, error) {
 	vm := version
 	if versionMap[version] != "" {
 		vm = versionMap[version]
 	}
-	f, err := os.Stat(baseDir)
+	baseDir := GetBaseDir()
+	_, err := os.Stat(baseDir)
 	if err != nil {
 		os.MkdirAll(baseDir, os.ModePerm)
-		f, err = os.Stat(baseDir)
 	}
-	localAbs, _ := filepath.Abs(f.Name())
+	localAbs, _ := filepath.Abs(baseDir)
 	filePath := fmt.Sprintf("%s.zip", baseDir+string(filepath.Separator)+version)
 	_, errT := os.Stat(filePath)
 	if errT != nil {
 		client := http.Client{
-			Timeout: DownLoadTimeOut,
+			Timeout: time.Duration(timeout) * time.Second,
 		}
 		res, err := client.Get(fmt.Sprintf("%s/iOSDeviceSupport/raw/master/iOSDeviceSupport/%s.zip", url, vm))
 		if err != nil {
@@ -181,7 +188,7 @@ func downloadZip(url, version string) (string, error) {
 		newFile, err := os.Create(filePath)
 		w := bufio.NewWriter(newFile)
 		io.Copy(w, r)
-		abs, _ := filepath.Abs(newFile.Name())
+		abs, _ := filepath.Abs(filePath)
 		errZip := unzip(abs, baseDir, version)
 		if errZip != nil {
 			os.Remove(newFile.Name())
@@ -233,11 +240,11 @@ func unzip(zipFile, destDir, version string) error {
 	return nil
 }
 
-func loadDevelopImage(version string) (string, bool) {
+func loadDevelopImage(version string, timeout int) (string, bool) {
 	var done = false
 	var path = ""
 	for _, s := range urlList {
-		p, err1 := downloadZip(s, version)
+		p, err1 := downloadZip(s, version, timeout)
 		if err1 == nil {
 			path = p
 			done = true
@@ -261,14 +268,14 @@ func GetDeviceVersion(device giDevice.Device) string {
 	return reVer
 }
 
-func CheckMount(device giDevice.Device) {
+func CheckMount(device giDevice.Device, timeout int) {
 	sign, errImage := device.Images()
 	if errImage != nil || len(sign) == 0 {
 		fmt.Println("try to mount developer disk image...")
 
 		reVer := GetDeviceVersion(device)
 
-		p, done := loadDevelopImage(reVer)
+		p, done := loadDevelopImage(reVer, timeout)
 		if done {
 			var dmg = "DeveloperDiskImage.dmg"
 			var sign = dmg + ".signature"

@@ -21,12 +21,13 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/SonicCloudOrg/sonic-ios-bridge/src/entity"
-	"github.com/SonicCloudOrg/sonic-ios-bridge/src/util"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/SonicCloudOrg/sonic-ios-bridge/src/entity"
+	"github.com/SonicCloudOrg/sonic-ios-bridge/src/util"
+	"github.com/spf13/cobra"
 )
 
 var connectCmd = &cobra.Command{
@@ -39,13 +40,14 @@ var connectCmd = &cobra.Command{
 			log.Panic(fmt.Sprintf("connect to %s:%d failed, error:%v", host, port, err))
 		}
 		log.Printf("connect to %s:%d succeeded, device os version :%v", host, port, version)
-		_, err = os.Stat(".sib")
+		baseDir := util.GetBaseDir()
+		_, err = os.Stat(baseDir)
 		if err != nil {
-			os.MkdirAll(".sib", os.ModePerm)
-			os.Stat(".sib")
+			os.MkdirAll(baseDir, os.ModePerm)
+			os.Stat(baseDir)
 		}
 
-		file, err := os.OpenFile(util.RemoteInfoFilePath, os.O_RDWR|os.O_CREATE, os.ModePerm)
+		file, err := os.OpenFile(util.GetRemoteInfoFilePath(), os.O_RDWR|os.O_CREATE, os.ModePerm)
 		defer file.Close()
 
 		if err != nil {

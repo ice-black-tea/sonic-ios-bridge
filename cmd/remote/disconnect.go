@@ -21,12 +21,13 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/SonicCloudOrg/sonic-ios-bridge/src/entity"
-	"github.com/SonicCloudOrg/sonic-ios-bridge/src/util"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/SonicCloudOrg/sonic-ios-bridge/src/entity"
+	"github.com/SonicCloudOrg/sonic-ios-bridge/src/util"
+	"github.com/spf13/cobra"
 )
 
 var disConnectCmd = &cobra.Command{
@@ -35,13 +36,13 @@ var disConnectCmd = &cobra.Command{
 	Long:  "Disconnect remote device",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		_, err := os.Stat(".sib")
+		_, err := os.Stat(util.GetBaseDir())
 		if err != nil {
 			fmt.Println("success")
 			return nil
 		}
 
-		file, err := os.OpenFile(util.RemoteInfoFilePath, os.O_RDWR, os.ModePerm)
+		file, err := os.OpenFile(util.GetRemoteInfoFilePath(), os.O_RDWR, os.ModePerm)
 		defer file.Close()
 
 		if err != nil {
